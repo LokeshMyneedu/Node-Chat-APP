@@ -38,8 +38,11 @@ io.on('connection',(socket)=>{
 
     //message event
     socket.on('createMessage',(message,callback)=>{
-       console.log('Got new message from client ',message);
-       io.emit('newMessage',generateMessage(message.from,message.text)); // broadcast to all users including the user who submitted the event toooooooooooooooooo
+        let user =users.getUser(socket.id);
+        if(user&&isRealString(message.text)){
+            io.to(user.room).emit('newMessage',generateMessage(user.name,message.text)); // broadcast to all users including the user who submitted the event toooooooooooooooooo
+        }       
+      
     callback();
        // socket.broadcast.emit('newMessage',{
     //     from:message.from,
@@ -50,8 +53,11 @@ io.on('connection',(socket)=>{
 
     //location event
     socket.on('createLocation',(coords)=>{
-        io.emit('newLocationMessage',generateLocationMessage('Admin',coords.latitude,coords.longitude));     
-     });
+        let user =users.getUser(socket.id);
+        if(user){
+        io.to(user.room).emit('newLocationMessage',generateLocationMessage(user.name,coords.latitude,coords.longitude));     
+     }
+    });
   
      //disconnect event
      socket.on('disconnect',()=>{
